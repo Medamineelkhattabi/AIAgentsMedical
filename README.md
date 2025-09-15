@@ -35,7 +35,7 @@ An advanced AI-powered clinical decision support system that demonstrates modern
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Web Interface │    │  EHR Integration│    │   Monitoring    │
-│   (Real-time)   │    │   (FHIR/HL7)   │    │   & Analytics   │
+│   (Real-time)   │    │   (FHIR/HL7)    │    │   & Analytics   │
 └─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
           │                      │                      │
           └──────────────────────┼──────────────────────┘
