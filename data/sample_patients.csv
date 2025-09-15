@@ -1,0 +1,17 @@
+# Expanded sample dataset for demonstration (CSV format)
+fever,cough,chest_pain,shortness_of_breath,rash,headache,nausea,sensitivity_to_light,abdominal_pain,diarrhea,joint_pain,swelling,stiff_neck,sore_throat,diagnosis
+1,1,0,1,0,0,0,0,0,0,0,0,0,0,COVID-19
+1,0,0,0,1,0,0,0,0,0,0,0,0,0,Measles
+0,0,0,0,0,1,1,1,0,0,0,0,0,0,Migraine
+0,0,1,1,0,0,0,0,0,0,0,0,0,0,Possible Heart Issue
+0,0,0,0,0,0,0,0,1,1,0,0,0,0,Gastroenteritis
+0,0,0,0,0,0,0,0,0,0,1,1,0,0,Arthritis
+1,1,0,0,0,0,0,0,0,0,0,0,0,0,Flu
+1,0,0,0,0,1,1,0,0,0,0,0,0,0,Dengue
+1,0,0,0,1,0,0,0,0,0,1,0,0,0,Chikungunya
+0,0,0,0,0,0,1,0,1,1,0,0,0,0,Food Poisoning
+1,0,0,0,0,1,0,0,0,0,0,0,1,0,Meningitis
+1,1,1,0,0,0,0,0,0,0,0,0,0,0,Pneumonia
+1,0,0,0,0,0,0,0,0,0,0,0,0,1,Strep Throat
+1,0,0,0,0,0,0,0,0,0,0,0,0,0,Unknown
+0,1,0,0,0,0,0,0,0,0,0,0,0,0,Unknown

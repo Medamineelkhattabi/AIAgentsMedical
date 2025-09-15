@@ -1,0 +1,43 @@
+# Enhanced medical dataset with comprehensive symptoms and conditions
+# This dataset includes real-world medical conditions with multiple symptom combinations
+patient_id,age,gender,fever,cough,chest_pain,shortness_of_breath,headache,nausea,fatigue,joint_pain,rash,abdominal_pain,diarrhea,vomiting,sore_throat,runny_nose,muscle_aches,dizziness,weight_loss,night_sweats,diagnosis,severity,comorbidities
+P001,45,M,1,1,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,Pneumonia,High,diabetes
+P002,67,F,1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,0,Heart Failure,Critical,hypertension;diabetes
+P003,23,F,1,1,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,0,Influenza,Medium,none
+P004,55,M,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,Myocardial Infarction,Critical,hypertension;smoking
+P005,34,F,1,0,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,0,Systemic Lupus Erythematosus,High,none
+P006,78,M,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,COPD Exacerbation,High,copd;smoking
+P007,29,F,1,1,0,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,COVID-19,Medium,none
+P008,42,M,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0,0,0,0,Gastroenteritis,Low,none
+P009,61,F,1,0,0,0,1,0,1,1,0,0,0,0,0,0,1,1,0,1,Rheumatoid Arthritis,Medium,arthritis
+P010,38,M,1,1,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,Bacterial Pneumonia,High,none
+P011,52,F,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,Pulmonary Embolism,Critical,obesity
+P012,25,M,1,0,0,0,1,1,1,0,1,0,0,0,1,0,1,0,0,0,Viral Meningitis,High,none
+P013,71,F,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,Lung Cancer,Critical,smoking;copd
+P014,33,F,1,0,0,0,1,1,1,1,0,1,0,0,0,0,0,0,0,0,Migraine,Low,none
+P015,48,M,1,1,0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,Strep Throat,Low,none
+P016,59,F,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,1,0,0,Angina,Medium,diabetes;hypertension
+P017,27,M,1,1,0,1,1,0,1,0,0,0,0,0,0,0,1,0,0,0,Atypical Pneumonia,Medium,none
+P018,64,F,1,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,0,Polymyalgia Rheumatica,Medium,none
+P019,41,M,0,0,0,0,1,1,0,0,0,1,1,1,0,0,0,1,0,0,Inflammatory Bowel Disease,Medium,none
+P020,56,F,1,1,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,1,Tuberculosis,High,diabetes
+P021,31,F,1,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,Systemic Infection,High,immunocompromised
+P022,73,M,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,Chronic Heart Failure,High,heart_disease;diabetes
+P023,26,F,1,1,0,0,1,0,1,0,0,0,0,0,1,1,1,0,0,0,Common Cold,Low,none
+P024,49,M,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,Acute Coronary Syndrome,Critical,hypertension;smoking
+P025,37,F,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,0,Fibromyalgia,Low,none
+P026,68,M,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,Pneumocystis Pneumonia,Critical,immunocompromised
+P027,44,F,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,1,0,0,Peptic Ulcer Disease,Medium,none
+P028,58,M,1,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,Pericarditis,Medium,none
+P029,35,F,1,1,0,1,1,0,1,0,0,0,0,0,0,0,1,0,0,0,Legionnaires Disease,High,none
+P030,62,F,0,0,1,1,0,1,1,0,0,0,0,0,0,0,0,1,0,0,Congestive Heart Failure,High,heart_disease;hypertension
+P031,39,M,1,0,0,0,1,1,1,1,0,0,0,0,0,0,1,1,0,0,Chronic Fatigue Syndrome,Low,none
+P032,51,F,1,1,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1,Aspiration Pneumonia,High,none
+P033,28,M,1,0,0,0,1,1,1,0,1,0,0,0,1,0,1,0,0,0,Encephalitis,Critical,none
+P034,66,F,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,Interstitial Lung Disease,High,none
+P035,43,M,1,1,0,1,1,0,1,0,0,0,0,0,0,1,1,0,0,0,H1N1 Influenza,High,none
+P036,54,F,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,Unstable Angina,High,diabetes;hypertension
+P037,32,M,1,0,0,0,1,1,1,1,1,0,0,0,0,0,1,0,0,0,Autoimmune Disorder,Medium,none
+P038,69,F,1,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,1,1,Hospital Acquired Pneumonia,Critical,copd;diabetes
+P039,46,M,0,0,0,0,1,1,1,0,0,1,1,1,0,0,0,1,0,0,Crohns Disease,Medium,none
+P040,57,F,1,0,1,1,0,0,1,0,0,0,0,0,0,0,1,0,0,0,Viral Myocarditis,High,none

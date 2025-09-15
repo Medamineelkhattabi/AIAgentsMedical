@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Decision Support System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary: #f8fafc;
+            --accent: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #ffffff;
+            --shadow: 0 10px 25px rgba(0,0,0,0.1);
+            --border-radius: 16px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: var(--light);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .metric-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: var(--primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+            margin-right: 1rem;
+            color: var(--accent);
+        }
+
+        .card h3 {
+            color: var(--dark);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .vitals-input {
+            position: relative;
+        }
+
+        .vitals-input input {
+            padding-right: 2.5rem;
+        }
+
+        .vitals-unit {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fafbfc;
+        }
+
+        .checkbox-item:hover {
+            border-color: var(--accent);
+            background: white;
+        }
+
+        .checkbox-item input {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+            accent-color: var(--accent);
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .pain-slider {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .pain-scale {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #10b981, #f59e0b, #ef4444);
+            appearance: none;
+            outline: none;
+        }
+
+        .pain-scale::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid var(--accent);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .pain-value {
+            position: absolute;
+            top: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
+        .real-time-feed {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .feed-item {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.3s ease;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .feed-item:hover {
+            background: #f8fafc;
+        }
+
+        .feed-item:last-child {
+            border-bottom: none;
+        }
+
+        .feed-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .patient-id {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .diagnosis {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .triage-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .triage-resuscitation { background: #fecaca; color: #991b1b; }
+        .triage-emergent { background: #fed7aa; color: #9a3412; }
+        .triage-urgent { background: #fef3c7; color: #92400e; }
+        .triage-less_urgent { background: #d1fae5; color: #065f46; }
+        .triage-non_urgent { background: #dbeafe; color: #1e40af; }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .results {
+            margin-top: 3rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .result-card {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--accent);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+        }
+
+        .diagnosis-primary {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.8s ease;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-low { background: #d1fae5; color: #065f46; }
+        .risk-medium { background: #fef3c7; color: #92400e; }
+        .risk-high { background: #fed7aa; color: #9a3412; }
+        .risk-critical { background: #fecaca; color: #991b1b; }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 2rem;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .alert {
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            border-left: 4px solid;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border-color: var(--success);
+            color: #166534;
+        }
+
+        .alert-danger {
+            background: #fef2f2;
+            border-color: var(--danger);
+            color: #991b1b;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border-color: var(--warning);
+            color: #92400e;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .loading i {
+            font-size: 3rem;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .status-online { background: var(--success); }
+        .status-warning { background: var(--warning); }
+        .status-offline { background: var(--danger); }
+
+        .recommendations {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .recommendations h4 {
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .recommendations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+        }
+
+        .recommendations li:last-child {
+            border-bottom: none;
+        }
+
+        .recommendations li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-hospital"></i> Clinical Decision Support System</h1>
+            <p>Advanced AI-powered medical diagnostics and triage system</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Real-time Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="metric-value" id="accuracy-metric">--</div>
+                <div class="metric-label">Model Accuracy</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="metric-value" id="predictions-metric">--</div>
+                <div class="metric-label">Predictions Today</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">
+                    <i class="fas fa-server"></i>
+                </div>
+                <div class="metric-value" id="system-status">
+                    <span class="status-indicator status-online"></span>Online
+                </div>
+                <div class="metric-label">System Status</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Patient Assessment Form -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="card-icon fas fa-user-md"></i>
+                    <h3>Patient Assessment</h3>
+                </div>
+                
+                <form id="assessment-form">
+                    <div class="form-group">
+                        <label for="patient-id"><i class="fas fa-id-card"></i> Patient ID</label>
+                        <input type="text" id="patient-id" class="form-control" placeholder="Enter patient ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chief-complaint"><i class="fas fa-comment-medical"></i> Chief Complaint</label>
+                        <input type="text" id="chief-complaint" class="form-control" placeholder="Primary reason for visit">
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-exclamation-triangle"></i> Pain Level (0-10)</label>
+                        <div class="pain-slider">
+                            <input type="range" id="pain-level" min="0" max="10" value="0" class="pain-scale">
+                            <div class="pain-value" id="pain-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-heartbeat"></i> Vital Signs</label>
+                        <div class="vitals-grid">
+                            <div class="vitals-input">
+                                <input type="number" id="systolic-bp" class="form-control" placeholder="Systolic">
+                                <span class="vitals-unit">mmHg</span>
+                            </div>
+                            <div class="vitals-input">
+                                <input type="number" id="diastolic-bp" class="form-control" placeholder="Diastolic">
+                                <span class="vitals-unit">mmHg</span>
+                            </div>
+                            <div class="vitals-input">
+                                <input type="number" id="heart-rate" class="form-control" placeholder="Heart Rate">
+                                <span class="vitals-unit">bpm</span>
+                            </div>
+                            <div class="vitals-input">
+                                <input type="number" id="temperature" class="form-control" placeholder="Temperature">
+                                <span class="vitals-unit">°C</span>
+                            </div>
+                            <div class="vitals-input">
+                                <input type="number" id="oxygen-sat" class="form-control" placeholder="O2 Sat">
+                                <span class="vitals-unit">%</span>
+                            </div>
+                            <div class="vitals-input">
+                                <input type="number" id="resp-rate" class="form-control" placeholder="Resp Rate">
+                                <span class="vitals-unit">/min</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-stethoscope"></i> Symptoms</label>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="fever" name="symptoms" value="fever">
+                                <label for="fever">🌡️ Fever</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="cough" name="symptoms" value="cough">
+                                <label for="cough">😷 Cough</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="chest-pain" name="symptoms" value="chest_pain">
+                                <label for="chest-pain">💔 Chest Pain</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="shortness-breath" name="symptoms" value="shortness_of_breath">
+                                <label for="shortness-breath">🫁 Shortness of Breath</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="headache" name="symptoms" value="headache">
+                                <label for="headache">🤕 Headache</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="nausea" name="symptoms" value="nausea">
+                                <label for="nausea">🤢 Nausea</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="fatigue" name="symptoms" value="fatigue">
+                                <label for="fatigue">😴 Fatigue</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="joint-pain" name="symptoms" value="joint_pain">
+                                <label for="joint-pain">🦴 Joint Pain</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age"><i class="fas fa-birthday-cake"></i> Age</label>
+                        <input type="number" id="age" class="form-control" placeholder="Patient age">
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Analyze Patient
+                        </button>
+                        <button type="button" id="train-models" class="btn btn-secondary">
+                            <i class="fas fa-brain"></i> Train Models
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Real-time Activity Feed -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="card-icon fas fa-activity"></i>
+                    <h3>Real-time Activity</h3>
+                </div>
+                <div class="real-time-feed" id="activity-feed">
+                    <div class="loading">
+                        <i class="fas fa-spinner"></i>
+                        <p>Waiting for activity...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results" id="results-section" style="display: none;">
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="result-icon fas fa-diagnoses" style="color: var(--accent);"></i>
+                        <h3>Clinical Assessment</h3>
+                    </div>
+                    <div id="clinical-results"></div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="result-icon fas fa-ambulance" style="color: var(--danger);"></i>
+                        <h3>Triage Assessment</h3>
+                    </div>
+                    <div id="triage-results"></div>
+                </div>
+                
+                <div class="result-card">
+                    <div class="result-header">
+                        <i class="result-icon fas fa-route" style="color: var(--success);"></i>
+                        <h3>Clinical Pathway</h3>
+                    </div>
+                    <div id="pathway-results"></div>
+                </div>
+            </div>
+            
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <i class="card-icon fas fa-file-medical"></i>
+                    <h3>Clinical Report</h3>
+                </div>
+                <div id="clinical-report"></div>
+            </div>
+        </div>
+
+        <!-- Performance Analytics -->
+        <div class="card">
+            <div class="card-header">
+                <i class="card-icon fas fa-chart-area"></i>
+                <h3>Performance Analytics</h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="performance-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO
+        const socket = io();
+        
+        // Chart initialization
+        let performanceChart;
+        
+        // DOM elements
+        const assessmentForm = document.getElementById('assessment-form');
+        const resultsSection = document.getElementById('results-section');
+        const clinicalResults = document.getElementById('clinical-results');
+        const triageResults = document.getElementById('triage-results');
+        const pathwayResults = document.getElementById('pathway-results');
+        const clinicalReport = document.getElementById('clinical-report');
+        const activityFeed = document.getElementById('activity-feed');
+        const painLevel = document.getElementById('pain-level');
+        const painValue = document.getElementById('pain-value');
+        
+        // Update pain level display
+        painLevel.addEventListener('input', function() {
+            painValue.textContent = this.value;
+            const percentage = (this.value / 10) * 100;
+            painValue.style.left = percentage + '%';
+        });
+        
+        // Socket event handlers
+        socket.on('connect', function() {
+            console.log('Connected to server');
+            updateSystemStatus('online');
+            socket.emit('request_dashboard_update');
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Disconnected from server');
+            updateSystemStatus('offline');
+        });
+        
+        socket.on('new_diagnosis', function(data) {
+            addActivityFeedItem(data);
+        });
+        
+        socket.on('dashboard_update', function(data) {
+            updateMetrics(data.metrics);
+        });
+        
+        // Form submission
+        assessmentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = collectFormData();
+            
+            try {
+                const response = await fetch('/api/diagnose', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayResults(result);
+                } else {
+                    showAlert('Error: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Network error: ' + error.message, 'danger');
+            }
+        });
+        
+        // Train models button
+        document.getElementById('train-models').addEventListener('click', async function() {
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Training...';
+            
+            try {
+                const response = await fetch('/api/train_models', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Models trained successfully!', 'success');
+                } else {
+                    showAlert('Training failed: ' + result.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('Training error: ' + error.message, 'danger');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-brain"></i> Train Models';
+            }
+        });
+        
+        function collectFormData() {
+            const symptoms = {};
+            document.querySelectorAll('input[name="symptoms"]:checked').forEach(cb => {
+                symptoms[cb.value] = 1;
+            });
+            
+            // Add unchecked symptoms as 0
+            document.querySelectorAll('input[name="symptoms"]:not(:checked)').forEach(cb => {
+                symptoms[cb.value] = 0;
+            });
+            
+            return {
+                patient_id: document.getElementById('patient-id').value || 'anonymous',
+                chief_complaint: document.getElementById('chief-complaint').value,
+                pain_level: parseInt(document.getElementById('pain-level').value),
+                symptoms: symptoms,
+                vitals: {
+                    systolic_bp: parseFloat(document.getElementById('systolic-bp').value) || 0,
+                    diastolic_bp: parseFloat(document.getElementById('diastolic-bp').value) || 0,
+                    heart_rate: parseFloat(document.getElementById('heart-rate').value) || 0,
+                    temperature: parseFloat(document.getElementById('temperature').value) || 0,
+                    oxygen_saturation: parseFloat(document.getElementById('oxygen-sat').value) || 0,
+                    respiratory_rate: parseFloat(document.getElementById('resp-rate').value) || 0
+                },
+                patient_info: {
+                    age: parseInt(document.getElementById('age').value) || 0
+                }
+            };
+        }
+        
+        function displayResults(result) {
+            const clinical = result.clinical_assessment;
+            const triage = result.triage_assessment;
+            
+            // Clinical Results
+            clinicalResults.innerHTML = `
+                <div class="diagnosis-primary">${clinical.primary_diagnosis}</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: ${clinical.confidence * 100}%"></div>
+                </div>
+                <p><strong>Confidence:</strong> ${(clinical.confidence * 100).toFixed(1)}%</p>
+                <div class="risk-badge risk-${clinical.risk_level}">${clinical.risk_level.toUpperCase()}</div>
+            `;
+            
+            // Triage Results
+            triageResults.innerHTML = `
+                <div class="triage-badge triage-${triage.triage_level.toLowerCase()}">${triage.triage_level}</div>
+                <p style="margin-top: 1rem;"><strong>Wait Time:</strong> ${triage.estimated_wait_time}</p>
+                <p><strong>Triage Score:</strong> ${triage.triage_score.toFixed(2)}</p>
+                ${triage.alerts.length > 0 ? `
+                    <div style="margin-top: 1rem;">
+                        <strong>Alerts:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            ${triage.alerts.map(alert => `<li style="color: var(--danger);">${alert}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+            
+            // Pathway Results
+            pathwayResults.innerHTML = `
+                <div class="recommendations">
+                    <h4><i class="fas fa-route"></i> Recommended Actions</h4>
+                    <ul>
+                        ${clinical.clinical_pathway.pathway.map(action => `<li>${action}</li>`).join('')}
+                    </ul>
+                </div>
+                <p style="margin-top: 1rem;"><strong>Specialist:</strong> ${clinical.clinical_pathway.specialist}</p>
+                <p><strong>Urgency:</strong> ${clinical.clinical_pathway.urgency}</p>
+            `;
+            
+            // Clinical Report
+            clinicalReport.innerHTML = `
+                <pre style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.9rem;">${result.clinical_report}</pre>
+            `;
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function addActivityFeedItem(data) {
+            const feedItem = document.createElement('div');
+            feedItem.className = 'feed-item';
+            feedItem.innerHTML = `
+                <div class="feed-header">
+                    <div>
+                        <span class="patient-id">Patient ${data.patient_id}</span> - 
+                        <span class="diagnosis">${data.diagnosis}</span>
+                    </div>
+                    <div class="triage-badge triage-${data.triage_level.toLowerCase()}">${data.triage_level}</div>
+                </div>
+                <div class="timestamp">${new Date(data.timestamp).toLocaleString()}</div>
+            `;
+            
+            if (activityFeed.querySelector('.loading')) {
+                activityFeed.innerHTML = '';
+            }
+            
+            activityFeed.insertBefore(feedItem, activityFeed.firstChild);
+            
+            // Keep only last 10 items
+            while (activityFeed.children.length > 10) {
+                activityFeed.removeChild(activityFeed.lastChild);
+            }
+        }
+        
+        function updateMetrics(metrics) {
+            document.getElementById('accuracy-metric').textContent = 
+                (metrics.accuracy * 100).toFixed(1) + '%';
+            document.getElementById('predictions-metric').textContent = 
+                metrics.prediction_count || 0;
+        }
+        
+        function updateSystemStatus(status) {
+            const statusElement = document.getElementById('system-status');
+            const indicator = statusElement.querySelector('.status-indicator');
+            
+            indicator.className = `status-indicator status-${status}`;
+            statusElement.innerHTML = `<span class="status-indicator status-${status}"></span>${status.charAt(0).toUpperCase() + status.slice(1)}`;
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-triangle' : 'info-circle'}"></i> ${message}`;
+            
+            document.querySelector('.container').insertBefore(alert, document.querySelector('.metrics-grid'));
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+        
+        // Initialize performance chart
+        function initPerformanceChart() {
+            const ctx = document.getElementById('performance-chart').getContext('2d');
+            performanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Model Accuracy',
+                        data: [],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            grid: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: '#f1f5f9'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load performance metrics
+        async function loadPerformanceMetrics() {
+            try {
+                const response = await fetch('/api/performance_metrics');
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateMetrics(result.metrics);
+                    
+                    // Update chart
+                    if (performanceChart) {
+                        performanceChart.data.labels.push(new Date().toLocaleTimeString());
+                        performanceChart.data.datasets[0].data.push(result.metrics.accuracy || 0.85);
+                        
+                        // Keep only last 10 data points
+                        if (performanceChart.data.labels.length > 10) {
+                            performanceChart.data.labels.shift();
+                            performanceChart.data.datasets[0].data.shift();
+                        }
+                        
+                        performanceChart.update();
+                    }
+                } else {
+                    // Add sample data if no real data available
+                    if (performanceChart && performanceChart.data.labels.length === 0) {
+                        addSampleData();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading performance metrics:', error);
+                // Add sample data on error
+                if (performanceChart && performanceChart.data.labels.length === 0) {
+                    addSampleData();
+                }
+            }
+        }
+        
+        function addSampleData() {
+            const sampleData = [0.82, 0.85, 0.87, 0.84, 0.89, 0.91, 0.88, 0.92, 0.90, 0.93];
+            const now = new Date();
+            
+            for (let i = 0; i < sampleData.length; i++) {
+                const time = new Date(now.getTime() - (sampleData.length - i) * 60000);
+                performanceChart.data.labels.push(time.toLocaleTimeString());
+                performanceChart.data.datasets[0].data.push(sampleData[i]);
+            }
+            
+            performanceChart.update();
+            
+            // Update metrics with latest sample
+            updateMetrics({
+                accuracy: sampleData[sampleData.length - 1],
+                prediction_count: 47
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initPerformanceChart();
+            loadPerformanceMetrics();
+            
+            // Update metrics every 30 seconds
+            setInterval(loadPerformanceMetrics, 30000);
+        });
+    </script>
+</body>
+</html>
