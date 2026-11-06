@@ -67,7 +67,7 @@ An advanced AI-powered clinical decision support system that demonstrates modern
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/AIAgentsMedical.git
+git clone https://github.com/Medamineelkhattabi/AIAgentsMedical.git
 cd AIAgentsMedical
 
 # Install minimal dependencies (recommended)
@@ -136,17 +136,10 @@ python interface/advanced_webapp.py
 
 ## 📈 Performance Metrics
 
-### Clinical Accuracy
-- **Diagnostic Accuracy**: >85% on validation dataset
-- **Triage Accuracy**: >90% for high-acuity cases
-- **False Positive Rate**: <10% for critical conditions
-- **Response Time**: <2 seconds for diagnosis
-
-### System Performance
-- **Throughput**: 1000+ assessments/hour
-- **Availability**: 99.9% uptime target
-- **Scalability**: Horizontal scaling support
-- **Latency**: <100ms API response time
+`python train_models.py` trains the models on `data/enhanced_medical_dataset.csv` and prints each
+model's cross-validation score (mean ± standard deviation). The dataset is small and meant for
+demonstration, and the system has not been clinically validated, so these scores say nothing about
+real patients.
 
 ## 🔧 Configuration
 
@@ -263,10 +256,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📞 Support & Issues
 
-- **Bug Reports**: [Create an issue](https://github.com/yourusername/AIAgentsMedical/issues)
-- **Feature Requests**: [Request a feature](https://github.com/yourusername/AIAgentsMedical/issues)
-- **Documentation**: Check the [Wiki](https://github.com/yourusername/AIAgentsMedical/wiki)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/AIAgentsMedical/discussions)
+- **Bug reports and feature requests**: [open an issue](https://github.com/Medamineelkhattabi/AIAgentsMedical/issues)
 
 ## 📋 License
 
@@ -281,7 +271,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Add more comprehensive test suite
 
 
-**Made with ❤️ for healthcare innovation** effectiveness research
+**Built for healthcare innovation and research.**
 
 ---
 
